@@ -7,8 +7,11 @@ const router = express.Router();
 const app = express();
 const PORT = 3001;
 
+// public folder where uploaded images are stored
 app.use(express.static('public'));
+app.use('/static', express.static(path.join(__dirname, 'public')))
 
+// allow CORS from the frontend
 app.use(function(req, res, next) {
     res.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
   
@@ -27,6 +30,7 @@ app.use(function(req, res, next) {
     next();
   });
 
+  // store iamges on the file system of the server
   const storage = multer.diskStorage({
     destination: "./public/uploads/",
     filename: function(req, file, cb){
@@ -34,13 +38,14 @@ app.use(function(req, res, next) {
     }
  });
  
- const upload = multer({
+ // single image upload
+ const uploadSingle = multer({
     storage: storage,
     limits:{fileSize: 1000000},
  }).single("myImage");
 
  app.post('/upload', function (req, res) {
-  upload(req, res, function (err) {
+  uploadSingle(req, res, function (err) {
       console.log("Request ---", req.body);
       console.log("Request file ---", req.file);
       
@@ -50,13 +55,11 @@ app.use(function(req, res, next) {
   })
 })
 
-// app.post('/upload', upload.single('photo'), (req, res) => {
-//     if(req.file) {
-//         console.log("image received: " + req.file.originalname);
-//         res.json(req.file);
-//     }
-//     else throw 'error';
-// });
+// retrieve an image
+app.get('/getImage', function (req, res){
+  console.log(req);
+  res.send('static/uploads/IMAGE-1563083113002.png');
+})
 
 app.listen(PORT, () => {
     console.log('Image repo started. Listening at ' + PORT );
