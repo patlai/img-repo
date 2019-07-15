@@ -1,8 +1,8 @@
 const express = require('express');
 const multer = require('multer');
 const path = require('path')
-//const upload = multer({dest: __dirname + 'public/uploads/images'});
 const router = express.Router();
+const images = require("./logic/Images")
 
 const app = express();
 const PORT = 3001;
@@ -46,21 +46,33 @@ app.use(function(req, res, next) {
 
  app.post('/upload', function (req, res) {
   uploadSingle(req, res, function (err) {
-      console.log("Request ---", req.body);
-      console.log("Request file ---", req.file);
-      
+      //console.log("Request ---", req.body);
+      //console.log("Request file ---", req.file);
+      fileName = req.file.filename
+      console.log(fileName);
+      images.addImage(fileName);
       if(!err) {
           return res.sendStatus(200).end();
       }
   })
 })
 
+// retrieve all images
+app.get('/getAllImages', async function (req, res){
+  console.log("getting all images")
+  imageFileNames = await images.getAllImages();
+  console.log(imageFileNames)
+  imagePaths = imageFileNames.map(name => `static/uploads/${name}`);
+  res.send(imagePaths);
+});
+
 // retrieve an image
-app.get('/getImage', function (req, res){
-  console.log(req);
-  res.send('static/uploads/IMAGE-1563083113002.png');
-})
+app.get('/getImage', async function (req, res){
+  //console.log(req);
+  imageResult = await images.getImageByFileName('IMAGE-1563168965803.png');
+  res.send(`static/uploads/${imageResult}`);
+});
 
 app.listen(PORT, () => {
-    console.log('Image repo started. Listening at ' + PORT );
+  console.log('Image repo started. Listening at ' + PORT );
 });
