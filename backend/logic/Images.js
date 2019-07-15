@@ -1,4 +1,5 @@
 const mysql = require("../sql/connection");
+const rootUploadFolder = "static/uploads/"
 
 var addImage = async imageName => {
 
@@ -51,8 +52,13 @@ var getAllImages = async () => {
   }
 }
 
+var createImagePath = imageName => {
+  return `${rootUploadFolder}${imageName}`
+};
+
 module.exports = {
   addImage,
   getImageByFileName,
   getAllImages,
+  createImagePath,
 };

@@ -51,8 +51,10 @@ app.use(function(req, res, next) {
       fileName = req.file.filename
       console.log(fileName);
       images.addImage(fileName);
+     
       if(!err) {
-          return res.sendStatus(200).end();
+        return res.send(images.createImagePath(fileName)).end();
+        //return res.sendStatus(200).end();
       }
   })
 })
@@ -62,7 +64,7 @@ app.get('/getAllImages', async function (req, res){
   console.log("getting all images")
   imageFileNames = await images.getAllImages();
   console.log(imageFileNames)
-  imagePaths = imageFileNames.map(name => `static/uploads/${name}`);
+  imagePaths = imageFileNames.map(name => images.createImagePath(name));
   res.send(imagePaths);
 });
 
@@ -70,7 +72,7 @@ app.get('/getAllImages', async function (req, res){
 app.get('/getImage', async function (req, res){
   //console.log(req);
   imageResult = await images.getImageByFileName('IMAGE-1563168965803.png');
-  res.send(`static/uploads/${imageResult}`);
+  res.send(images.createImagePath(imageResult));
 });
 
 app.listen(PORT, () => {
