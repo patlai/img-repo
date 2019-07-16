@@ -11,13 +11,12 @@ class UploadImage extends React.Component {
       file: null,
       files: [],
       images: [],
+      imageTags: null,
     };
 
-    this.onFormSubmit = this.onFormSubmit.bind(this);
     this.onFormSubmitMulti = this.onFormSubmitMulti.bind(this);
     this.onChange = this.onChange.bind(this);
     this.onChangeMulti = this.onChangeMulti.bind(this);
-    this.retrieveImage = this.retrieveImage.bind(this);
     this.retrieveAllImages = this.retrieveAllImages.bind(this);
     this.renderImage = this.renderImage.bind(this);
   }
@@ -26,21 +25,13 @@ class UploadImage extends React.Component {
     this.retrieveAllImages();
   };
 
-  retrieveImage() {
-    Api().get("/getImage").then(res => {
-      console.log(res)
-      this.setState({
-        images: [...this.state.images, res.config.baseURL + res.data]
-      })
-    })
-  }
-
   retrieveAllImages() {
     Api().get("/getAllImages").then(res => {
       console.log(res.data)
       console.log(typeof res.data)
       this.setState({
         images: Object.keys(res.data).map(fileName => (res.config.baseURL + fileName)),
+        //tags: res.data,
       })
     })
   }
@@ -66,35 +57,8 @@ class UploadImage extends React.Component {
         console.log(res.data.length + " Images successfully uploaded");
         console.log(res.data);
         this.setState({
-          images: [...this.state.images, ...Object.keys(res.data).map(fileName => (res.config.baseURL + fileName))]
-        })
-      })
-      .catch(error => {
-        console.log(error);
-      });
-  }
-
-  onFormSubmit(e) {
-    e.preventDefault();
-
-    console.log(this.state.file)
-
-    const formData = new FormData();
-
-    formData.append("myImage", this.state.file);
-
-    const config = {
-      headers: {
-        "content-type": "multipart/form-data"
-      }
-    };
-
-    Api().post("/upload", formData, config)
-      .then(res => {
-        console.log("Image successfully uploaded");
-        console.log(res.data);
-        this.setState({
-          images: [...this.state.images, res.config.baseURL + res.data]
+          images: [...this.state.images, ...Object.keys(res.data).map(fileName => (res.config.baseURL + fileName))],
+          //tags: [...this.state.tags, ...res.data],
         })
       })
       .catch(error => {
@@ -116,13 +80,7 @@ class UploadImage extends React.Component {
 
   render() {
     return (
-      <div>
-        {/* <form onSubmit={this.onFormSubmit}>
-          <h1>File Upload</h1>
-          <input type="file" name="myImage" onChange={this.onChange} />
-          <button type="submit">Upload</button>
-        </form> */}
-        
+      <div> 
         <div className="uploadSection">
           <form onSubmit={this.onFormSubmitMulti}>
             <h2 className="section">File Upload Multi</h2>
@@ -131,7 +89,6 @@ class UploadImage extends React.Component {
           </form>
         </div>
 
-        <button onClick={this.retrieveImage}>get image</button>
         <button onClick={this.retrieveAllImages}>get all images</button>
         <div>
           <h2 className="section">My Images</h2>

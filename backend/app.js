@@ -73,14 +73,11 @@ app.post('/multiUpload', function (req, res) {
 
       let labels = await images.addImages(fileNames);
     
-      console.log(labels)
+      //console.log(labels)
 
       labels = labels.map(t => {
         return {labels: t.labels, imageFileName: images.createImagePath(t.imageName)}
       })
-
-      console.log("REEEEEE")
-      console.log(labels)
 
       let newImagesAndTags = images.groupImagesByFileName(labels, 'imageFileName')
       console.log(newImagesAndTags)
