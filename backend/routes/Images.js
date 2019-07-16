@@ -1,19 +1,44 @@
 const mysql = require("../sql/connection");
 const rootUploadFolder = "static/uploads/"
 
+function GetDateString(){
+  let currYear = new Date().getFullYear();
+  let currMonth = new Date().getMonth();
+  let currDay = new Date().getDate();
+  let currDate = `${currYear}-${currMonth}-${currDay}`;
+  return currDate
+}
+
 var addImage = async imageName => {
 
   console.log("trying to add image: " + imageName)
 
   let connection = await mysql.getNewConnection();
   try {
-    let currYear = new Date().getFullYear();
-    let currMonth = new Date().getMonth();
-    let currDay = new Date().getDate();
-    let currDate = `${currYear}-${currMonth}-${currDay}`;
-    console.log(currDate);
+    await connection.query("INSERT INTO Images (fileName, date, description) VALUES (?, ?, ?);", [imageName, GetDateString(), ""]);
+    return true;
+  } catch (error) {
+    console.error(error);
+    throw new Error(false);
+  } finally {
+    connection.release();
+  }
+};
 
-    await connection.query("INSERT INTO Images (fileName, date, description) VALUES (?, ?, ?);", [imageName, "2019-06-14", ""]);
+var addImages = async imageNames => {
+
+  console.log("trying to add multiple images into the database")
+
+  let connection = await mysql.getNewConnection();
+  try {
+    let currentFiles = await connection.query("SELECT fileName FROM Images;");
+    let currentFileNames = new Set(currentFiles.map(f => f["fileName"]))
+
+    // only get the images that aren't already in the db
+    imageNames = imageNames.filter(f => !currentFileNames.has(f))
+    let payload = imageNames.map(i => [i, GetDateString(), ""])
+
+    await connection.query("INSERT INTO Images (fileName, date, description) VALUES ?;", [payload]);
     return true;
   } catch (error) {
     console.error(error);
@@ -58,6 +83,7 @@ var createImagePath = imageName => {
 
 module.exports = {
   addImage,
+  addImages,
   getImageByFileName,
   getAllImages,
   createImagePath,

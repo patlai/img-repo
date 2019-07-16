@@ -2,7 +2,9 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path')
 const router = express.Router();
-const images = require("./logic/Images")
+const images = require("./routes/Images")
+
+const maxFileSize = 1000000;
 
 const app = express();
 const PORT = 3001;
@@ -41,8 +43,14 @@ app.use(function(req, res, next) {
  // single image upload
  const uploadSingle = multer({
     storage: storage,
-    limits:{fileSize: 1000000},
+    limits:{fileSize: maxFileSize},
  }).single("myImage");
+
+// multi image upload
+const uploadMulti = multer({
+  storage: storage,
+  limits:{filesize: maxFileSize},
+}).array("myImages");
 
  app.post('/upload', function (req, res) {
   uploadSingle(req, res, function (err) {
@@ -54,6 +62,19 @@ app.use(function(req, res, next) {
      
       if(!err) {
         return res.send(images.createImagePath(fileName)).end();
+      }
+  })
+})
+
+app.post('/multiUpload', function (req, res) {
+  uploadMulti(req, res, function (err) {
+      console.log("Request ---", req.body);
+      let fileNames = req.files.map(f => f.filename);
+    
+      images.addImages(fileNames);
+     
+      if(!err) {
+        return res.send(fileNames.map(f => images.createImagePath(f))).end();
         //return res.sendStatus(200).end();
       }
   })
