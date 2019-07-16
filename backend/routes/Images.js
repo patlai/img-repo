@@ -2,6 +2,17 @@ const mysql = require("../sql/connection");
 const imageRecognition = require("../logic/imageRecognition")
 const rootUploadFolder = "static/uploads/"
 
+const groupBy = key => array =>
+  array.reduce((objectsByKeyValue, obj) => {
+    const value = obj[key];
+    objectsByKeyValue[value] = (objectsByKeyValue[value] || []).concat(obj);
+    return objectsByKeyValue;
+  }, {});
+
+function groupImagesByFileName(tagPayload, key){
+  return (groupBy(key))(tagPayload)
+}
+
 function GetDateString(){
   let currYear = new Date().getFullYear();
   let currMonth = new Date().getMonth();
@@ -37,14 +48,15 @@ var addImages = async imageNames => {
 
     // only get the images that aren't already in the db
     imageNames = imageNames.filter(f => !currentFileNames.has(f))
-    let payload = imageNames.map(i => [i, GetDateString(), ""])
-
+    
     let labels = await imageRecognition.RecognizeAllImages(imageNames)
     console.log(labels)
     addLabels(labels)
 
+    let payload = imageNames.map(i => [i, GetDateString(), ""])
     await connection.query("INSERT INTO Images (fileName, date, description) VALUES ?;", [payload]);
-    return true;
+    
+    return labels;
   } catch (error) {
     console.error(error);
     throw new Error(false);
@@ -101,7 +113,11 @@ var getAllTags = async () => {
   let connection = await mysql.getNewConnection();
   try{
     let res = await connection.query("SELECT tag, imageFileName FROM Tags");
-    return res
+    res = res.map(t => {
+      return {tag: t.tag, imageFileName: createImagePath(t.imageFileName)}
+    })
+
+    return groupImagesByFileName(res, 'imageFileName')
   } catch (error){
     console.error(error);
     return null;
@@ -115,6 +131,7 @@ var createImagePath = imageName => {
 };
 
 module.exports = {
+  groupImagesByFileName,
   addImage,
   addImages,
   getImageByFileName,

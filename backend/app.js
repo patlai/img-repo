@@ -67,14 +67,27 @@ const uploadMulti = multer({
 })
 
 app.post('/multiUpload', function (req, res) {
-  uploadMulti(req, res, function (err) {
-      console.log("Request ---", req.body);
+  uploadMulti(req, res, async function (err) {
+      //console.log("Request ---", req.body);
       let fileNames = req.files.map(f => f.filename);
 
-      images.addImages(fileNames);
-     
+      let labels = await images.addImages(fileNames);
+    
+      console.log(labels)
+
+      labels = labels.map(t => {
+        return {labels: t.labels, imageFileName: images.createImagePath(t.imageName)}
+      })
+
+      console.log("REEEEEE")
+      console.log(labels)
+
+      let newImagesAndTags = images.groupImagesByFileName(labels, 'imageFileName')
+      console.log(newImagesAndTags)
+
       if(!err) {
-        return res.send(fileNames.map(f => images.createImagePath(f))).end();
+        return res.send(newImagesAndTags).end();
+        //return res.send(fileNames.map(f => images.createImagePath(f))).end();
         //return res.sendStatus(200).end();
       }
   })
@@ -85,13 +98,14 @@ app.get('/getAllImages', async function (req, res){
   console.log("getting all images")
   imageFileNames = await images.getAllImages();
   let tags = await images.getAllTags();
-  let imagesAndTags = tags.map(pair => {
-    return {tag: pair["tag"], path: images.createImagePath(pair["imageFileName"])}
-  })
+
+  // let imagesAndTags = tags.map(pair => {
+  //   return {tag: pair["tag"], path: images.createImagePath(pair["imageFileName"])}
+  // })
   console.log(tags)
   
-  imagePaths = imageFileNames.map(name => images.createImagePath(name));
-  res.send(imagesAndTags);
+  //imagePaths = imageFileNames.map(name => images.createImagePath(name));
+  res.send(tags);
 });
 
 // retrieve an image

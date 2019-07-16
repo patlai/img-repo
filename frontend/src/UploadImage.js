@@ -38,8 +38,9 @@ class UploadImage extends React.Component {
   retrieveAllImages() {
     Api().get("/getAllImages").then(res => {
       console.log(res.data)
+      console.log(typeof res.data)
       this.setState({
-        images: res.data.map(d => `${res.config.baseURL}${d.path}`),
+        images: Object.keys(res.data).map(fileName => (res.config.baseURL + fileName)),
       })
     })
   }
@@ -65,7 +66,7 @@ class UploadImage extends React.Component {
         console.log(res.data.length + " Images successfully uploaded");
         console.log(res.data);
         this.setState({
-          images: [...this.state.images, ...res.data.map(f => res.config.baseURL + f)]
+          images: [...this.state.images, ...Object.keys(res.data).map(fileName => (res.config.baseURL + fileName))]
         })
       })
       .catch(error => {
@@ -121,19 +122,23 @@ class UploadImage extends React.Component {
           <input type="file" name="myImage" onChange={this.onChange} />
           <button type="submit">Upload</button>
         </form> */}
-
-        <form onSubmit={this.onFormSubmitMulti}>
-          <h1>File Upload Multi</h1>
-          <input type="file" name="myImages" multiple="multiple" onChange={this.onChangeMulti} />
-          <button type="submit">Upload</button>
-        </form>
+        
+        <div className="uploadSection">
+          <form onSubmit={this.onFormSubmitMulti}>
+            <h2 className="section">File Upload Multi</h2>
+            <input type="file" name="myImages" multiple="multiple" onChange={this.onChangeMulti} />
+            <button type="submit">Upload</button>
+          </form>
+        </div>
 
         <button onClick={this.retrieveImage}>get image</button>
         <button onClick={this.retrieveAllImages}>get all images</button>
         <div>
-          <h2>My Images</h2>
-          <div className="ImageGallery">
-            {this.state.images.map(image => this.renderImage(image))}
+          <h2 className="section">My Images</h2>
+          <div className="imageGallery">
+            <div>
+              {this.state.images.map(image => this.renderImage(image))}
+            </div>
           </div>
         </div>
       </div>
