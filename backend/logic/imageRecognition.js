@@ -1,18 +1,31 @@
-const vision = require('@google-cloud/vision');
+const vision = require("@google-cloud/vision");
+const images = require("../routes/Images");
+const threshold = 0.95;
 
-async function RecognizeAllImages() {
-    // Imports the Google Cloud client library
-  
-    // Creates a client
-    const client = new vision.ImageAnnotatorClient();
-  
-    // Performs label detection on the image file
-    const [result] = await client.labelDetection('./resources/wakeupcat.jpg');
-    const labels = result.labelAnnotations;
-    console.log('Labels:');
-    labels.forEach(label => console.log(label.description));
+async function RecognizeAllImages(imageNameList) {
+  // Creates a client
+  const client = new vision.ImageAnnotatorClient();
+
+  let imageLabels = [];
+
+  console.log(imageNameList);
+
+  await Promise.all(
+    imageNameList.map(async imageName => {
+      // Performs label detection on the image file
+      let filePath = `public/uploads/${imageName}`;
+      const [result] = await client.labelDetection(filePath);
+
+      // only get the labels with a score above the threshold
+      const labels = result.labelAnnotations.filter(x => x.score > threshold).map(label => label.description);
+      
+      imageLabels.push({ imageName: imageName, labels: labels });
+    })
+  );
+
+  return imageLabels;
 }
 
 module.exports = {
-    RecognizeAllImages,
+  RecognizeAllImages
 };

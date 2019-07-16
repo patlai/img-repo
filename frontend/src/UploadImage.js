@@ -39,7 +39,7 @@ class UploadImage extends React.Component {
     Api().get("/getAllImages").then(res => {
       console.log(res.data)
       this.setState({
-        images: res.data.map(d => `${res.config.baseURL}${d}`),
+        images: res.data.map(d => `${res.config.baseURL}${d.path}`),
       })
     })
   }

@@ -1,4 +1,5 @@
 const mysql = require("../sql/connection");
+const imageRecognition = require("../logic/imageRecognition")
 const rootUploadFolder = "static/uploads/"
 
 function GetDateString(){
@@ -38,6 +39,10 @@ var addImages = async imageNames => {
     imageNames = imageNames.filter(f => !currentFileNames.has(f))
     let payload = imageNames.map(i => [i, GetDateString(), ""])
 
+    let labels = await imageRecognition.RecognizeAllImages(imageNames)
+    console.log(labels)
+    addLabels(labels)
+
     await connection.query("INSERT INTO Images (fileName, date, description) VALUES ?;", [payload]);
     return true;
   } catch (error) {
@@ -47,6 +52,21 @@ var addImages = async imageNames => {
     connection.release();
   }
 };
+
+// [{imageName: "something", labels: [array of strings]}]
+var addLabels = async imageLabels => {
+  let connection = await mysql.getNewConnection();
+  try{
+    console.log("trying to insert tags into database")
+    let payload = imageLabels.map(il => il.labels.map(label => [0, label, il.imageName])).flat()
+    await connection.query("INSERT INTO Tags (tagId, tag, imageFileName) VALUES ?;", [payload]);
+  } catch (error) {
+    console.error(error);
+    throw new Error(false);
+  } finally {
+    connection.release();
+  }
+}
 
 var getImageByFileName = async imageName => {
   console.log("trying get image: " + imageName)
@@ -77,6 +97,19 @@ var getAllImages = async () => {
   }
 }
 
+var getAllTags = async () => {
+  let connection = await mysql.getNewConnection();
+  try{
+    let res = await connection.query("SELECT tag, imageFileName FROM Tags");
+    return res
+  } catch (error){
+    console.error(error);
+    return null;
+  } finally {
+    connection.release();
+  }
+}
+
 var createImagePath = imageName => {
   return `${rootUploadFolder}${imageName}`
 };
@@ -86,5 +119,6 @@ module.exports = {
   addImages,
   getImageByFileName,
   getAllImages,
+  getAllTags,
   createImagePath,
 };

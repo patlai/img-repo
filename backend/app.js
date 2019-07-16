@@ -70,7 +70,7 @@ app.post('/multiUpload', function (req, res) {
   uploadMulti(req, res, function (err) {
       console.log("Request ---", req.body);
       let fileNames = req.files.map(f => f.filename);
-    
+
       images.addImages(fileNames);
      
       if(!err) {
@@ -84,9 +84,14 @@ app.post('/multiUpload', function (req, res) {
 app.get('/getAllImages', async function (req, res){
   console.log("getting all images")
   imageFileNames = await images.getAllImages();
-  console.log(imageFileNames)
+  let tags = await images.getAllTags();
+  let imagesAndTags = tags.map(pair => {
+    return {tag: pair["tag"], path: images.createImagePath(pair["imageFileName"])}
+  })
+  console.log(tags)
+  
   imagePaths = imageFileNames.map(name => images.createImagePath(name));
-  res.send(imagePaths);
+  res.send(imagesAndTags);
 });
 
 // retrieve an image
