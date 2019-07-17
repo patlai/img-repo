@@ -20,7 +20,6 @@ async function RecognizeAllImages(imageNameList) {
       // only get the labels with a score above the threshold
       const labels = result.labelAnnotations.filter(x => x.score > threshold).map(label => label.description);
     
-      //imageLabels.push({ imageName: imageName, labels: labels });
       console.log("LABELS FROM IMAGE REC:")
       console.log(labels)
       labels.forEach(label => {

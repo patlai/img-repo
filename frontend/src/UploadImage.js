@@ -18,7 +18,6 @@ class UploadImage extends React.Component {
     };
 
     this.onFormSubmitMulti = this.onFormSubmitMulti.bind(this);
-    this.onChange = this.onChange.bind(this);
     this.onChangeMulti = this.onChangeMulti.bind(this);
     this.retrieveAllImages = this.retrieveAllImages.bind(this);
     this.renderImage = this.renderImage.bind(this);
@@ -123,10 +122,6 @@ class UploadImage extends React.Component {
     return (<img src={imageSrc} className="gallery"/>)
   }
 
-  onChange(e) {
-    this.setState({ file: e.target.files[0] });
-  }
-
   onChangeMulti(e) {
     this.setState({ files: [...e.target.files] });
   }
@@ -159,7 +154,6 @@ class UploadImage extends React.Component {
           <h2 className="section">My Images</h2>
           <div className="imageGallery">
             { this.renderImagesWithTags(this.state.imageTags) }
-            {/* {this.state.images.map(image => this.renderImage(image))} */}
           </div>
         </div>
       </div>
