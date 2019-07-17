@@ -1,16 +1,22 @@
 img.gallery {
-    width: 20%;
-    padding: 10px;
     display:inline-block;
+    width: 100%;
 }
 
 h2.section {
     text-align: center;
 }
 
+div.imageWrapper {
+    width: 20%;
+    padding: 10px;
+    display:inline-block;
+}
+
 div.imageGallery {
     align-content: center;
     text-align:center;
+    width: 100%;
 }
 
 div.uploadSection {

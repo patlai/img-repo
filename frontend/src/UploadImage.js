@@ -12,6 +12,8 @@ class UploadImage extends React.Component {
       files: [],
       images: [],
       imageTags: null,
+      tags: null,
+      baseURL: "",
     };
 
     this.onFormSubmitMulti = this.onFormSubmitMulti.bind(this);
@@ -19,19 +21,41 @@ class UploadImage extends React.Component {
     this.onChangeMulti = this.onChangeMulti.bind(this);
     this.retrieveAllImages = this.retrieveAllImages.bind(this);
     this.renderImage = this.renderImage.bind(this);
+    this.renderImagesWithTags = this.renderImagesWithTags.bind(this);
   }
 
   componentDidMount = () => {
     this.retrieveAllImages();
   };
 
+  // render all images with their respective tags below them
+  renderImagesWithTags(payload) {
+    let result = []
+    for (var key in payload){
+
+      // key should be the image path without the server's url
+      let tags = payload[key].map(tagImagePair => tagImagePair.tag)
+      let tagsHtml = tags.map(tag => <div>{tag}</div>)
+      let imageSrc = this.state.baseURL + key
+
+      result.push(
+        <div className="imageWrapper">
+          <img src={imageSrc} className="gallery"/>
+          {tagsHtml}
+        </div>
+      )
+    }
+    return result
+  }
+
   retrieveAllImages() {
     Api().get("/getAllImages").then(res => {
       console.log(res.data)
       console.log(typeof res.data)
       this.setState({
+        baseURL: res.config.baseURL,
         images: Object.keys(res.data).map(fileName => (res.config.baseURL + fileName)),
-        //tags: res.data,
+        imageTags: res.data,
       })
     })
   }
@@ -93,9 +117,8 @@ class UploadImage extends React.Component {
         <div>
           <h2 className="section">My Images</h2>
           <div className="imageGallery">
-            <div>
-              {this.state.images.map(image => this.renderImage(image))}
-            </div>
+            { this.renderImagesWithTags(this.state.imageTags) }
+            {/* {this.state.images.map(image => this.renderImage(image))} */}
           </div>
         </div>
       </div>
