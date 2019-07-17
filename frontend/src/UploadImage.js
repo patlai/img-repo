@@ -22,11 +22,35 @@ class UploadImage extends React.Component {
     this.retrieveAllImages = this.retrieveAllImages.bind(this);
     this.renderImage = this.renderImage.bind(this);
     this.renderImagesWithTags = this.renderImagesWithTags.bind(this);
+    this.renderTags = this.renderTags.bind(this);
+    this.getUniqueTags = this.getUniqueTags.bind(this);
   }
 
   componentDidMount = () => {
     this.retrieveAllImages();
   };
+
+  renderTags(){
+    return this.state.tags.map(tag => 
+      <button>{tag}</button>
+    )
+  }
+
+  getUniqueTags(payload) {
+    let uniqueTags = new Set()
+
+    for (var key in payload){
+      let tags = payload[key].map(tagImagePair => tagImagePair.tag)
+
+      tags.forEach(tag => {
+        if (!uniqueTags.has(tag)){
+          uniqueTags.add(tag)
+        }
+      });
+    }
+
+    return Array.from(uniqueTags)
+  }
 
   // render all images with their respective tags below them
   renderImagesWithTags(payload) {
@@ -56,6 +80,7 @@ class UploadImage extends React.Component {
         baseURL: res.config.baseURL,
         images: Object.keys(res.data).map(fileName => (res.config.baseURL + fileName)),
         imageTags: res.data,
+        tags: this.getUniqueTags(res.data),
       })
     })
   }
@@ -124,6 +149,10 @@ class UploadImage extends React.Component {
 
         {/* <button onClick={this.retrieveAllImages}>get all images</button> */}
         <div>
+          <h2 className="section">My Tags</h2>
+          <div className="tags">
+            { this.renderTags() }
+          </div>
           <h2 className="section">My Images</h2>
           <div className="imageGallery">
             { this.renderImagesWithTags(this.state.imageTags) }
