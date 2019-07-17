@@ -3,6 +3,10 @@ img.gallery {
     width: 100%;
 }
 
+h1.section {
+    text-align: center;
+}
+
 h2.section {
     text-align: center;
 }

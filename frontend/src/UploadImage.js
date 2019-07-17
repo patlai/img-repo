@@ -12,7 +12,7 @@ class UploadImage extends React.Component {
       files: [],
       images: [],
       imageTags: null,
-      tags: null,
+      tags: [],
       baseURL: "",
     };
 
@@ -82,6 +82,7 @@ class UploadImage extends React.Component {
         console.log(res.data);
         this.setState({
           images: [...this.state.images, ...Object.keys(res.data).map(fileName => (res.config.baseURL + fileName))],
+          imageTags: {...this.state.imageTags, ...res.data},
           //tags: [...this.state.tags, ...res.data],
         })
       })
@@ -105,15 +106,23 @@ class UploadImage extends React.Component {
   render() {
     return (
       <div> 
-        <div className="uploadSection">
-          <form onSubmit={this.onFormSubmitMulti}>
-            <h2 className="section">File Upload Multi</h2>
-            <input type="file" name="myImages" multiple="multiple" onChange={this.onChangeMulti} />
-            <button type="submit">Upload</button>
-          </form>
+         <h1 className="section">Image Lockr</h1>
+        <div className="section">
+          <p>
+            Welcome to Image Lockr! This is an AI powered image repository that will apply state of the art Image Recognition Machine Learning
+            models to auto-tag your images. Start uploading one or more images below and have tags auto-generated for you!
+          </p>
+        </div>
+        <div className="section">
+          <div className="uploadSection">
+            <form onSubmit={this.onFormSubmitMulti}>
+              <input type="file" name="myImages" multiple="multiple" onChange={this.onChangeMulti} />
+              <button type="submit">Upload</button>
+            </form>
+          </div>
         </div>
 
-        <button onClick={this.retrieveAllImages}>get all images</button>
+        {/* <button onClick={this.retrieveAllImages}>get all images</button> */}
         <div>
           <h2 className="section">My Images</h2>
           <div className="imageGallery">
