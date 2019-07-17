@@ -17,3 +17,6 @@ Requirements:
 
 ## App overview
 ![alt text](https://raw.githubusercontent.com/patlai/img-repo/master/archdiagram.png?token=ADSBLAKWVSMQY3LPFCLJV6S5G7FMY)
+
+## Known Issues
+* sometimes multer will assign the same name to 2 files that are being uploaded in the same batch. As a temporary fix, one of them will be stored on the server's filesystem but not in the database, so the user will only see one of those 2 files after uploading that batch
