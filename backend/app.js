@@ -3,6 +3,7 @@ const multer = require('multer');
 const path = require('path')
 const router = express.Router();
 const images = require("./routes/Images")
+const util = require("./logic/util")
 
 const maxFileSize = 1000000;
 
@@ -68,22 +69,19 @@ const uploadMulti = multer({
 
 app.post('/multiUpload', function (req, res) {
   uploadMulti(req, res, async function (err) {
-      //console.log("Request ---", req.body);
-      let fileNames = req.files.map(f => f.filename);
+      // only get the unique filenames
+      // known issue: sometimes files will be lost because 2 files coming from the user receive the same file name from multer
+      let fileNames = req.files.map(f => f.filename).filter(util.onlyUnique);
+
+      console.log("UPLOADED FILES: ")
+      console.log(fileNames)
 
       let labels = await images.addImages(fileNames);
-    
-      //console.log(labels)
-
-      labels = labels.map(t => {
-        return {labels: t.labels, imageFileName: images.createImagePath(t.imageName)}
-      })
-
-      let newImagesAndTags = images.groupImagesByFileName(labels, 'imageFileName')
-      console.log(newImagesAndTags)
 
       if(!err) {
-        return res.send(newImagesAndTags).end();
+        console.log("LABELS AFTER UPLOADING:")
+        console.log(labels)
+        return res.send(labels).end();
         //return res.send(fileNames.map(f => images.createImagePath(f))).end();
         //return res.sendStatus(200).end();
       }
@@ -96,12 +94,6 @@ app.get('/getAllImages', async function (req, res){
   imageFileNames = await images.getAllImages();
   let tags = await images.getAllTags();
 
-  // let imagesAndTags = tags.map(pair => {
-  //   return {tag: pair["tag"], path: images.createImagePath(pair["imageFileName"])}
-  // })
-  console.log(tags)
-  
-  //imagePaths = imageFileNames.map(name => images.createImagePath(name));
   res.send(tags);
 });
 

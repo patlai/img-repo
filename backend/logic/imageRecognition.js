@@ -10,6 +10,7 @@ async function RecognizeAllImages(imageNameList) {
 
   console.log(imageNameList);
 
+  // need to await all calls to the image recognizer
   await Promise.all(
     imageNameList.map(async imageName => {
       // Performs label detection on the image file
@@ -18,8 +19,13 @@ async function RecognizeAllImages(imageNameList) {
 
       // only get the labels with a score above the threshold
       const labels = result.labelAnnotations.filter(x => x.score > threshold).map(label => label.description);
-      
-      imageLabels.push({ imageName: imageName, labels: labels });
+    
+      //imageLabels.push({ imageName: imageName, labels: labels });
+      console.log("LABELS FROM IMAGE REC:")
+      console.log(labels)
+      labels.forEach(label => {
+        imageLabels.push({imageName: imageName, label: label})
+      });
     })
   );
 

@@ -12,6 +12,7 @@ class UploadImage extends React.Component {
       files: [],
       images: [],
       imageTags: null,
+      filteredImages: null,
       tags: [],
       baseURL: "",
     };
@@ -54,6 +55,8 @@ class UploadImage extends React.Component {
 
   // render all images with their respective tags below them
   renderImagesWithTags(payload) {
+    console.log(payload)
+
     let result = []
     for (var key in payload){
 
@@ -108,7 +111,7 @@ class UploadImage extends React.Component {
         this.setState({
           images: [...this.state.images, ...Object.keys(res.data).map(fileName => (res.config.baseURL + fileName))],
           imageTags: {...this.state.imageTags, ...res.data},
-          //tags: [...this.state.tags, ...res.data],
+          tags: [...this.state.tags, ...this.getUniqueTags(res.data)],
         })
       })
       .catch(error => {

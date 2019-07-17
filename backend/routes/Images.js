@@ -50,13 +50,21 @@ var addImages = async imageNames => {
     imageNames = imageNames.filter(f => !currentFileNames.has(f))
     
     let labels = await imageRecognition.RecognizeAllImages(imageNames)
-    console.log(labels)
     addLabels(labels)
+
+    //need a way to make sure the current set of image names is also unqiue
 
     let payload = imageNames.map(i => [i, GetDateString(), ""])
     await connection.query("INSERT INTO Images (fileName, date, description) VALUES ?;", [payload]);
     
-    return labels;
+    console.log("LABELS IN ADDIMAGES BEFORE GROUPING:")
+    console.log(labels)
+
+    return groupImagesByFileName(labels.map(t => {
+      return {tag: t.label, imageFileName: createImagePath(t.imageName)}
+    }), 'imageFileName')
+
+    //return labels;
   } catch (error) {
     console.error(error);
     throw new Error(false);
@@ -70,7 +78,10 @@ var addLabels = async imageLabels => {
   let connection = await mysql.getNewConnection();
   try{
     console.log("trying to insert tags into database")
-    let payload = imageLabels.map(il => il.labels.map(label => [0, label, il.imageName])).flat()
+    //let payload = imageLabels.map(il => il.labels.map(label => [0, label, il.imageName])).flat()
+    let payload = imageLabels.map(il => [0, il.label, il.imageName])
+    console.log("TAG PAYLOAD:")
+    console.log(payload)
     await connection.query("INSERT INTO Tags (tagId, tag, imageFileName) VALUES ?;", [payload]);
   } catch (error) {
     console.error(error);
